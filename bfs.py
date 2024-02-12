@@ -18,8 +18,53 @@ def bfs(tree):
     sol.reverse()
     return sol
 
+
+def get_order(tree):
+    r = tree.get_root()
+    sol = dfs(r, [], [] )
+    return sol 
+    
+
+
+'''def dfs(node, queue, suf):
+    if node.is_leave() :
+        suf.append(node)
+        if queue != []:
+            return dfs(queue[0], queue[1:], suf)
+        else: return 
+    else: 
+        for c in node.children:
+            queue.append(c)
+        return dfs(queue[0], queue[1:], suf)'''
+        
+def exploreNum(graphe, i, pref, suff, p, s):
+    pref[i] = p
+    p = p+1
+    for j in i.children:
+        if pref[j]==-1:
+        #A <- A + (i,j)
+            pref, suff, p, s = exploreNum(graphe, j, pref, suff, p, s)
+    suff[i] = s
+    s = s+1
+    return pref, suff, p, s
+    
+    
+def dfs(tree):
+    pref = dict.fromkeys(tree.nodes)
+    suf = dict.fromkeys(tree.nodes)
+    for i in tree.nodes:
+        pref[i] = -1
+        suf[i] = -1
+    p = 0
+    s = 0
+    for i in tree.nodes:
+        if pref[i] ==-1:
+            pref, suff, p, s = exploreNum(tree, i, pref, suf, p, s)
+    return suf 
+
+
 def create_indices(tree):
-    sol =bfs(tree)
+    sol =dfs(tree)
     for node in tree.nodes:
-        node.index = sol.index(node)
+        node.index = sol[node]
 

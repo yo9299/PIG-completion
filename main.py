@@ -6,6 +6,7 @@ Created on Mon Feb 12 15:12:45 2024
 @author: vardevol
 """
 import pnodes as p
+import qnodes as q 
 import trees 
 import bfs 
 
@@ -27,11 +28,12 @@ def main(tree):
             state= p.update_U(state, n)
             print("U")
             print(state.U)
-        #elif n.name == 'q':
+        elif n.name == 'q':
+            state = q.computeqU(state, tree, n)
             
         i +=1 
     return state
 
-s= main(trees.test_tree)
+s= main(trees.testq)
             
             

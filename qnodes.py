@@ -53,7 +53,7 @@ def rcost_qsubtree(tree, subtree):
 
 def rcost_qvert(tree, node, vertex):
     #find the section it belongs to
-    i= len(node.vertices)
+    i= len(node.vertices)-1
     brothers= node.children 
     while i >=0: # len(node.vertices):
         if vertex in node.vertices[i]:
@@ -71,31 +71,41 @@ def rcost_qvert(tree, node, vertex):
         j+=1
     return cost
 
+#the costs above are hopefullt okay
 
-def initialize_cost_subtree(M, tree, subtree):
-    return M[subtree.index][1]-M[subtree.index][0]+ rcost_qsubtree(tree, subtree)-cost_qsubtree(tree, subtree)
+def initialize_cost_subtree(state, tree, subtree):
+    print("subtree")
+    subtree.print_node()
+    #return M[subtree.index][1]-M[subtree.index][0]+ rcost_qsubtree(tree, subtree)-cost_qsubtree(tree, subtree)
+    return state.U[subtree.index][1]-state.U[subtree.index][0]+ rcost_qsubtree(tree, subtree)-cost_qsubtree(tree, subtree)
 
-def update_cost_subtree(M, tree, subtree, k):
-    return M[subtree.index][k]-M[subtree.index][k-1]+ rcost_qsubtree(tree,subtree)-cost_qsubtree(tree, subtree)
+def update_cost_subtree(state, tree, subtree, k):
+    #return M[subtree.index][k]-M[subtree.index][k-1]+ rcost_qsubtree(tree,subtree)-cost_qsubtree(tree, subtree)
+    return state.U[subtree.index][k]-state.U[subtree.index][k-1]+ rcost_qsubtree(tree,subtree)-cost_qsubtree(tree, subtree)
 
-def initialize_costs(M, tree, node): 
+def initialize_costs(state, tree, node): 
+    print("node in ")
+    node.print_node()
     lsubtrees = node.children 
     lsections= node.vertices 
     lcosts = [] 
+    #make this a dictionary
     for s in lsubtrees:
-        lcosts.append((s,0, initialize_cost_subtree(tree, s)))
-    for i in lsections:
+        lcosts.append([s,0, initialize_cost_subtree(state, tree, s)])
+    for i in range(len(lsections)):
+        print("lsections")
+        print(lsections)
         for j in lsections[i]:
-            lcosts.append(j, rcost_qvert(tree, node, j) - cost_qvert(tree, node, j))
+            lcosts.append([j, rcost_qvert(tree, node, j) - cost_qvert(tree, node, j)])
     return lcosts 
 
-def update_costs(M, tree, lcosts, chosen):
+def update_costs(state, tree, lcosts, chosen):
     if type(chosen[0])== int:
         lcosts.remove(chosen) #[c for c in lcosts if c[0]!= chosen]
     else: 
-        for c in range(lcosts):
+        for c in range(len(lcosts)):
             if lcosts[c] == chosen:
-                lcosts[c][2]= update_cost_subtree(M, tree, chosen[0], chosen[1])
+                lcosts[c][2]= update_cost_subtree(state, tree, chosen[0], chosen[1])
     return lcosts 
 
 #do this with a dictionary
@@ -111,23 +121,25 @@ def select_min(lcosts):
 
 
 
-def initial_rcost(M, tree, node):
+def initial_rcost(state, tree, node):
     total = 0
     for sect in node.vertices:
         for vertex in sect:
             total += rcost_qvert(tree, node, vertex)
     for t in node.children:
         total += rcost_qsubtree(tree, t )
-        total += M[t.index][0]
+        total += state.U[t.index][0]
     return total
 
-def computeqM(M, tree, node):
-    list_costs= initialize_cost_subtree(M, tree, node)
+def computeqU(state, tree, node):
+    print("node")
+    node.print_node()
+    list_costs= initialize_costs(state, tree, node)
     #define the initial cost with everything right
-    icost=initial_rcost(M, tree, node)
+    icost=initial_rcost(state, tree, node)
     r= 0
     while r < node.size:
-        M[node.index][r] = icost +select_min(list_costs)[-1]
-        list_costs = update_costs(M, tree, list_costs, select_min(list_costs))
+        state.U[node.index][r] = icost +select_min(list_costs)[-1]
+        list_costs = update_costs(state, tree, list_costs, select_min(list_costs))
         r +=1 
-    return M 
+    return state

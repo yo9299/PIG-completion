@@ -81,7 +81,13 @@ class Tree:
     def size_set_subtrees(self, list_s):
         return sum([self.nb_vertices_subtree(n) for n in list_s])
          
-
+class State:
+    def __init__(self, W, M, U, tree):
+        self.W = W
+        self.M=M
+        self.U = U
+        self.tree = tree 
+   
 
 ll = Tree_node([], [1], "l")
 lr = Tree_node([], [2,3], "l")
