@@ -56,7 +56,7 @@ def update_U(state, node):
     
     
 def add_to_smallest(state, added, tobeadded, u, r):
-    tb = tobeadded.size
+    tb = state.tree.nb_vertices_subtree(tobeadded)# tobeadded.size
     print(" tb " +str(tb) + " r: "+ str(r))
     if r- tb >= 0:
         cost = state.W[u.index][r-tb] + (r-tb)*tb + state.U[tobeadded.index][0]
@@ -68,7 +68,7 @@ def add_to_smallest(state, added, tobeadded, u, r):
     return cost 
 
 def add_to_largest(state, added, tobeadded, u, r):
-    tb= tobeadded.size 
+    tb= state.tree.nb_vertices_subtree(tobeadded) #tobeadded.size 
     added.append(u)
     tB = state.tree.size_set_subtrees(added) 
     print(" tB " +str(tB) + " r: "+ str(r))
