@@ -91,7 +91,7 @@ cr = Tree_node([], [4], "l")
 root = Tree_node([cl,cr], [6], "p")
 
 
-test_tree= Tree([ cl, ll, lr, lm])
+test_tree= Tree([ root, cl, cr, ll, lr, lm])
 
 l9= Tree_node([], [9], "l")
 l10 = Tree_node([], [10], "l")
