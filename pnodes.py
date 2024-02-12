@@ -30,6 +30,7 @@ def update_leaves(state, node):
 def update_M(state, node):
     rmax = math.floor(state.tree.size_set_subtrees(node.children)/2) 
     for u in node.children:
+        u.print_node()
         state.W[u.index] = copy.copy(state.U[u.index])
         brothers = [b for b in node.children if b != u]
         i = 0
@@ -58,7 +59,7 @@ def add_to_smallest(state, added, tobeadded, u, r):
     tb = tobeadded.size
     print(" tb " +str(tb) + " r: "+ str(r))
     if r- tb >= 0:
-        cost = state.W[u.index][r-tb] + (r-tb)*tb
+        cost = state.W[u.index][r-tb] + (r-tb)*tb + state.U[tobeadded.index][0]
         print("cost " + str(cost))
     else: 
         print("r-tb <0")
@@ -72,7 +73,8 @@ def add_to_largest(state, added, tobeadded, u, r):
     tB = state.tree.size_set_subtrees(added) 
     print(" tB " +str(tB) + " r: "+ str(r))
     if tB -r >= 0:
-        cost = state.W[u.index][r] + (tB -r)*tb 
+        cost = state.W[u.index][r] + (tB -r)*tb + state.U[tobeadded.index][0]
+        #when i add a subtree there is also the cost of making the subtree a clique
     else: 
         print("tB-r<0")
         cost = math.inf

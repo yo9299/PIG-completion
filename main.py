@@ -19,7 +19,7 @@ def main(tree):
             #state = p.update_U(state, n)
             #print(state.M)
             
-        else: 
+        elif n.name == 'p': 
             n.print_node()
             state= p.update_M(state, n)
             print("M")
@@ -27,6 +27,8 @@ def main(tree):
             state= p.update_U(state, n)
             print("U")
             print(state.U)
+        #elif n.name == 'q':
+            
         i +=1 
     return state
 
