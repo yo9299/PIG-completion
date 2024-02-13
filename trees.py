@@ -111,6 +111,7 @@ pe2 = Tree_node([l5,l11,l12], [6,7], "p")
 q1 = Tree_node([pe, l2, pe2], [[1],[1,3],[3]], "q")
 r = Tree_node([l4, q1], [8], "p")
 
+testp = Tree([pe2, l5, l11, l12])
 testq = Tree([r, q1,pe2, pe, l4, l2, l12, l11, l5, l10, l9])
 
 

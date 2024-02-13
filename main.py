@@ -13,12 +13,15 @@ import bfs
 def main(tree):
     state = p.create_initial_state(tree)
     i=0
-    while i < len(bfs.bfs(tree)):
-        n = bfs.bfs(tree)[i]
+    queue= sorted(bfs.dfs(tree).items(), key=lambda x:x[1])
+    queue= [x[0] for x in queue]
+    while i < len(queue):
+        n = queue[i]
         if n.is_leave():
+            n.print_node()
             state = p.update_leaves(state, n)
             #state = p.update_U(state, n)
-            #print(state.M)
+            print(state.U)
             
         elif n.name == 'p': 
             n.print_node()
@@ -29,11 +32,12 @@ def main(tree):
             print("U")
             print(state.U)
         elif n.name == 'q':
+            #break
             state = q.computeqU(state, tree, n)
             
         i +=1 
     return state
 
-s= main(trees.testq)
+s= main(trees.testp)
             
             

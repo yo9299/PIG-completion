@@ -67,6 +67,9 @@ def add_to_largest(state, added, tobeadded, u, r):
     tB = state.tree.size_set_subtrees(added) 
     #print(" tB " +str(tB) + " r: "+ str(r))
     if tB -r >= 0:
+        print("tobeadded")
+        print(state.W[u.index][r])
+        print(state.U[tobeadded.index][0])
         cost = state.W[u.index][r] + (tB -r)*tb + state.U[tobeadded.index][0]
         #when i add a subtree there is also the cost of making the subtree a clique
     else: 
