@@ -45,10 +45,9 @@ def update_M(state, node):
 def update_U(state, node):
     #print(state.tree.nb_vertices_subtree(node))
     node.print_node()
-    print(state.tree.nb_vertices_subtree(node))
+    #print(state.tree.nb_vertices_subtree(node))
     for r in range(math.floor(state.tree.nb_vertices_subtree(node)/2)+1):
-        print("r")
-        print(r)
+        
         state.U[node.index][r] = min([state.M[node.index][r-i] for i in range(node.size+1) if (r-i) >= 0])
     return state 
     
@@ -71,9 +70,7 @@ def add_to_largest(state, added, tobeadded, u, r):
     tB = state.tree.size_set_subtrees(added) 
     #print(" tB " +str(tB) + " r: "+ str(r))
     if tB -r >= 0:
-        print("tobeadded")
-        print(state.W[u.index][r])
-        print(state.U[tobeadded.index][0])
+        
         cost = state.W[u.index][r] + (tB -r)*tb + state.U[tobeadded.index][0]
         #when i add a subtree there is also the cost of making the subtree a clique
     else: 
