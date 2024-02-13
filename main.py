@@ -39,6 +39,6 @@ def main(tree):
     return state
 
 #the last row should be complete: he1 works
-s= main(trees.testp)
+s= main(trees.testq)
             
             
