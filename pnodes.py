@@ -3,10 +3,10 @@ import math
 import copy 
 import trees
      
-
+#p nodes fail for trees of height greater than 1
 def initialize_arrays(tree):
     n = tree.size 
-    r = math.ceil(tree.nb_vertices/2)
+    r = math.floor(tree.nb_vertices/2) +1
     M = np.array(np.ones((n,r))*np.inf)
     U = np.array(np.ones((n,r))*np.inf)
     W = np.array(np.ones((n,r))*np.inf)
@@ -44,7 +44,11 @@ def update_M(state, node):
         
 def update_U(state, node):
     #print(state.tree.nb_vertices_subtree(node))
+    node.print_node()
+    print(state.tree.nb_vertices_subtree(node))
     for r in range(math.floor(state.tree.nb_vertices_subtree(node)/2)+1):
+        print("r")
+        print(r)
         state.U[node.index][r] = min([state.M[node.index][r-i] for i in range(node.size+1) if (r-i) >= 0])
     return state 
     

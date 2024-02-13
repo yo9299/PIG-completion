@@ -38,6 +38,7 @@ def main(tree):
         i +=1 
     return state
 
+#the last row should be complete: he1 works
 s= main(trees.testp)
             
             

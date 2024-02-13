@@ -16,7 +16,11 @@ class Tree_node:
     
     #eliminate
     def nb_vertices_node(self):
-        return len(self.vertices)
+        if self.name == 'q':
+            nb = len(list(set([v for section in self.vertices for v in section])))
+        else:
+            nb = len(self.vertices)
+        return nb
     
     def print_node(self):
         print("Vertices: " + str(self.vertices) + "index: " + str(self.index))
@@ -26,7 +30,9 @@ class Tree:
     def __init__(self, nodes):
         self.nodes = nodes
         self.size = len(self.nodes)
-        self.nb_vertices = len([[v] for n in self.nodes for v in n.vertices])
+        #esta funcion está mal, no fun
+        self.nb_vertices= sum([v.nb_vertices_node() for v in self.nodes])
+        #self.nb_vertices = len([[v] for n in self.nodes for v in n.vertices])
         
     def initialize_indices(self):
         bfs.create_indices(self)
@@ -106,12 +112,13 @@ l11 = Tree_node([], [11], "l")
 l12 = Tree_node([], [12], "l")
 l2 = Tree_node([], [2], "l")
 l4 = Tree_node([], [4], "l")
-pe = Tree_node([l9,l10], [], "p")
+pe = Tree_node([l9,l10], [12], "p")
 pe2 = Tree_node([l5,l11,l12], [6,7], "p")
 q1 = Tree_node([pe, l2, pe2], [[1],[1,3],[3]], "q")
-r = Tree_node([l4, q1], [8], "p")
+r = Tree_node([l4, pe, pe2], [8], "p")
 
-testp = Tree([pe2, l5, l11, l12])
+he1 = Tree([pe2, l5, l11,l12, pe, l9, l10])
+testp = Tree([r, l4, pe, pe2, l9, l10, l5,l11,l12])
 testq = Tree([r, q1,pe2, pe, l4, l2, l12, l11, l5, l10, l9])
 
 

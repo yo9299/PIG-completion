@@ -95,7 +95,7 @@ def update_cost_subtree(state, tree, subtree, k):
     rmax = math.floor(tree.nb_vertices_subtree(subtree)/2)
     if k > rmax :
         k = tree.nb_verices_subtree(subtree)-k 
-    cost=state.U[subtree.index][k]-state.U[subtree.index][k-1]+ rcost_qsubtree(tree,subtree)-cost_qsubtree(tree, subtree)
+    cost=state.U[subtree.index][k]-state.U[subtree.index][k-1]+ cost_qsubtree(tree,subtree)-rcost_qsubtree(tree, subtree)
     #even worse! since we only have the costs for half of the table, if we are in the other half we need to infer it 
     #return M[subtree.index][k]-M[subtree.index][k-1]+ rcost_qsubtree(tree,subtree)-cost_qsubtree(tree, subtree)
     return cost 
