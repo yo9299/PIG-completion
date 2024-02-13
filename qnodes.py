@@ -172,9 +172,11 @@ def initial_rcost(state, tree, node):
             if vertex not in added:
                 total += rcost_qvert(tree, node, vertex)
                 added.append(vertex)
+    print(total)
     for t in node.children:
-        total += rcost_qsubtree(tree, t )
+        total += rcost_qsubtree(tree, t )*tree.nb_vertices_subtree(t)
         total += state.U[t.index][0]
+        print(total)
     return total
 
 def computeqU(state, tree, node):
