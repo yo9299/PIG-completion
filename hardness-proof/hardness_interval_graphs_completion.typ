@@ -53,13 +53,26 @@ The following one allows us to use weighted (i.e., with multiplicities) families
 *Fact:* For every family of closed intervals $cal(I)$ there always exist an optimal solution $(cal(I)',f)$ to the `Min_Interval-to-Proper-Iterval-Family-Completion` Problem such that for any two intervals $I,J in cal(I)$ with $a_I=a_J$ and $b_I=b_J$ then $a_(f(I))=a_(f(J))$ and $b_(f(I))=b_(f(J))$ also holds.
 
 _proof:_
-Andrea, dry, sharp, and clean.
+Let $I,J in cal(I)$ with $a_I=a_J$ and $b_I=b_J$ and assume we have a solution where $a_(f(I))!=a_(f(J))$ (respectively $b_(f(I))!=b_(f(J))$).
+Let $c_I, c_J$ be the respective costs of paid by $I$ and $J$ (i.e. the number of intervals they intersect).
+If $c_I = c_J$, we have an equivalent solution where $a_(f(I))=a_(f(J))$ (respectively $b_(f(I))=b_(f(J))$)
+If $c_I != c_J$, we can make the interval with the higher cost equal to the one with lower cost, thus lowering the total cost and having that $a_(f(I))=a_(f(J))$ (respectively $b_(f(I))=b_(f(J))$).
 QED
 
 *Fact:* For every family of closed intervals $cal(I)$ there always exist an optimal solution $(cal(I)',f)$ to the `Min_Interval-to-Proper-Iterval-Family-Completion` Problem such that every interval in $cal(I)'$ is contained in some interval of $cal(I)$. (In particular, the maximal intervals in $cal(I)$ are left unenlarged.)
 
 _proof:_
-Andrea, dry, sharp, and clean.
+// TODO: Fix this
+// For any family of closed intervals $cal(I)$, being proper is equivalent to saying that each interval $I in cal(I)$
+// should contain at least one extremity of all the intervals it intersects.
+// Suppose we have an interval $J' in cal(I)'$ (corresponding to an interval $J in cal(I)$) such that $#sym.exists.not I in cal(I) | J' in I$.
+// Look a the intersection between $J$ and $cal(I)$:
+// - If $J$ intersects only itself, then there is no reason to change the interval, so $J = J'$.
+// - If $J$ intersects other intervals, let $L, R$ be respectively the leftmost beginning and rightmost ending intervals intersecting with $J$.
+//   We would have that $cal(I)'$ $a_J < a_L$ and $b_R < b_L$, but for the above definition of proper interval is enough that
+//   $a_J = a_L$ and $b_R = b_L$, since $L$ and $R$ are proper and enlarging $J'$ more can only increase the cost and
+
+
 QED
 
 
