@@ -77,10 +77,10 @@ def draw_intervals(rulers, wall, lorry, car):
             if left_car[0] > right_car[0]:
                 left_car, right_car = right_car, left_car
 
-            if interval[1] == left_car[0] or interval[1] == left_car[0] + 2*L:
+            if interval[1] == left_car[0] or interval[1] == left_car[0] - L + 1:
                 is_discounted = 1
 
-            if interval[0] == right_car[0] or interval[0] == right_car[0] - 2*L:
+            if interval[0] == right_car[0] or interval[0] == right_car[0] + L - 1:
                 is_discounted = 2
 
 
@@ -91,10 +91,13 @@ def draw_intervals(rulers, wall, lorry, car):
         if is_discounted == 2:
             color = 'lightgreen'
 
-        ax.plot([interval[0], interval[1]], [y_pos, y_pos], color=color)
+        ry_pos = (y_pos + 0.05) if i % 2 == 0 else (y_pos + 0.0)
+
+
+        ax.plot([interval[0], interval[1]], [ry_pos, ry_pos], color=color)
         label_x = (interval[0] + interval[1]) / 2  # Calculate x-coordinate for label
-        label_y = y_pos + 0.1  # Adjust y-coordinate for label position
-        ax.text(label_x, label_y, f'{vertex}', ha='center', va='bottom', fontsize=8)  # Add text label
+        # label_y = y_pos + 0.1  # Adjust y-coordinate for label position
+        # ax.text(label_x, label_y, f'{vertex}', ha='center', va='bottom', fontsize=8)  # Add text label
 
     y_pos += 1
     walls_idx = 0
