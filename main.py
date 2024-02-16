@@ -21,7 +21,6 @@ def main(tree):
             n.print_node()
             state = p.update_leaves(state, n)
             #state = p.update_U(state, n)
-            print(state.U)
             
         elif n.name == 'p': 
             n.print_node()
