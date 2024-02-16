@@ -24,18 +24,6 @@ def get_order(tree):
     sol = dfs(r, [], [] )
     return sol 
     
-
-
-'''def dfs(node, queue, suf):
-    if node.is_leave() :
-        suf.append(node)
-        if queue != []:
-            return dfs(queue[0], queue[1:], suf)
-        else: return 
-    else: 
-        for c in node.children:
-            queue.append(c)
-        return dfs(queue[0], queue[1:], suf)'''
         
 def exploreNum(graphe, i, pref, suff, p, s):
     pref[i] = p

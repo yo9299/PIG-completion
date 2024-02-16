@@ -1,6 +1,8 @@
 import trees 
 import math 
-#left costs 
+
+
+#left costs of subtrees
 def cost_qsubtree(tree, subtree):
     p = tree.get_parent(subtree)
     brothers= p.children 
@@ -18,6 +20,7 @@ def cost_qsubtree(tree, subtree):
         j+=1
     return cost
 
+#left cost of vertices in the sections
 def cost_qvert(tree, node, vertex):
     #find the section it belongs to
     i= 0
@@ -65,7 +68,6 @@ def rcost_qvert(tree, node, vertex):
             break 
         else:
             i = i -1
-    #i think i could just call cost_qsubtree(tree, brothers[i])
     j = i+1
     cost = 0 
     added = []
@@ -79,7 +81,6 @@ def rcost_qvert(tree, node, vertex):
         j+=1
     return cost
 
-#the costs above are well define, to check below
 
 def initialize_cost_subtree(state, tree, subtree):
     subtree.print_node()
@@ -94,21 +95,14 @@ def initialize_cost_subtree(state, tree, subtree):
     return cost 
 
 def update_cost_subtree(state, tree, subtree, k):
-    #if k > rmax, then k= rmax -k 
     rmax = math.floor(tree.nb_vertices_subtree(subtree)/2)
-    #if k == tree.nb_vertices_subtree(subtree):
-     #   cost = -state.U[subtree.index][0]+ cost_qsubtree(tree,subtree)-rcost_qsubtree(tree, subtree)
-    #else: 
     if k > rmax :
         k0 = tree.nb_vertices_subtree(subtree)-k 
     else :
         k0 = k
     cost=state.U[subtree.index][k0]-state.U[subtree.index][k0-1]+ cost_qsubtree(tree,subtree)-rcost_qsubtree(tree, subtree)
-    print("update cost subtree")
-    print(k0)
-    print(cost)
-    print(state.U[subtree.index])
-    #even worse! since we only have the costs for half of the table, if we are in the other half we need to infer it 
+
+    #since we only have the costs for half of the table, if we are in the other half we need to infer it 
     #return M[subtree.index][k]-M[subtree.index][k-1]+ rcost_qsubtree(tree,subtree)-cost_qsubtree(tree, subtree)
     return cost 
 
@@ -119,8 +113,6 @@ def initialize_costs(state, tree, node):
     #make this a dictionary
     for s in lsubtrees:
         lcosts.append([s,0, initialize_cost_subtree(state, tree, s)])
-    #I'm adding the vertices twice, because they can appear in multiple sections, i should have 
-    # in the class a function to get set of vertices (unique)  
     added = []
     for i in range(len(lsections)):    
         for j in lsections[i]:
@@ -137,8 +129,6 @@ def update_costs(state, tree, lcosts, chosen):
         while c <(len(lcosts)):
             if lcosts[c] == chosen:
                 if chosen[1]+1 == tree.nb_vertices_subtree(chosen[0]):
-                    print("chosen1")
-                    print(chosen[1])
                     chosen[0].print_node()
                     lcosts.remove(chosen)
                 else: 
@@ -153,14 +143,11 @@ def update_costs(state, tree, lcosts, chosen):
 def select_min(lcosts):
     curmin = 1000000
     pos = None 
-    print("inside select min")
-    print(lcosts)
     for c in lcosts:
         if c[-1] < curmin:
             curmin = c[-1]
             pos = c 
     return pos 
-#compute costs for r 
 
 
 
@@ -172,11 +159,9 @@ def initial_rcost(state, tree, node):
             if vertex not in added:
                 total += rcost_qvert(tree, node, vertex)
                 added.append(vertex)
-    print(total)
     for t in node.children:
         total += rcost_qsubtree(tree, t )*tree.nb_vertices_subtree(t)
         total += state.U[t.index][0]
-        print(total)
     return total
 
 def computeqU(state, tree, node):
@@ -184,26 +169,19 @@ def computeqU(state, tree, node):
     list_costs= initialize_costs(state, tree, node)
     #define the initial cost with everything right
     icost=initial_rcost(state, tree, node)
-    print("list costs")
-    print(list_costs)
+   
     r= 0
     m = tree.nb_vertices_subtree(node)
     W=[icost]
 
     print(len(list_costs))
     while r < m:
-        #the list of costs cannot be empty
-        print(list_costs)
         W.append(icost +select_min(list_costs)[-1])
         #W[node.index][r] = icost +select_min(list_costs)[-1]
         list_costs = update_costs(state, tree, list_costs, select_min(list_costs))
         r +=1 
-        print(r)
-        print(W)
     rmax = math.floor(tree.nb_vertices_subtree(node)/2)
     for r in range(rmax):
         state.U[node.index][r] = min(W[r], W[m-r])
-        print("min")
-        print(min(W[r], W[m-r]))
         #min(state.M[node.index][r], state.M[node.index][m-r])
     return state
