@@ -41,7 +41,7 @@ def main(tree: trees.Tree):
 
 
 if __name__ == "__main__":
-    tree = trees.testp
+    tree = trees.testq
     cost, perm, _, mapping = main(tree)
     print("Cost", cost)
 
