@@ -9,11 +9,11 @@ def updatePnode(node, state):
     #create pnode state initializing W (n*r) and M*
     # for i in range(nb_childr) -> updateW
     finalW(node, state)
-    for r in range(math.floor(node.nbr_vertices_descendants()/2) +2):
+    for r in range(math.floor(node.nbr_vertices_descendants()/2) +1):
         cost = min(state.accessW(n, r) for n in node.children)
         state.updateU(node, r, cost)
     v = node.nbr_vertices() +1
-    for r in range(math.floor(node.nbr_vertices_descendants()/2) +2): 
+    for r in range(math.floor(node.nbr_vertices_subtree()/2) +1): 
         cost = min(state.accessU(node, r-i) for i in range(v) if (r-i) >= 0) 
         state.updateM(node, r, cost )
 

@@ -16,7 +16,13 @@ class Node:
     def nbr_vertices_subtree(self):
         """Calculates total vertices in the subtree rooted at this node."""
         return self.nbr_vertices() + self.nbr_vertices_descendants() #sum(child.nbr_vertices_subtree() for child in self.children)
-
+    
+    def get_vertices(self):
+        """Base method. Should be overridden in subclasses."""
+        raise NotImplementedError("This method should be implemented by subclasses.")
+    
+    def get_vertices_subtree(self):
+        return self.get_vertices() + sum([c.get_vertices_subtree() for c in self.children], [])
     
     
     def put_index(self, ind):
@@ -40,6 +46,9 @@ class Pnode(Node):
 
     def nbr_vertices(self):
         return (len(self.vertices))
+    
+    def get_vertices(self):
+        return self.vertices
     
     def __repr__(self):
         return (f"Pnode(vertices={self.vertices}, children=["
@@ -65,6 +74,8 @@ class Qnode(Node):
     def nbr_vertices(self):
         return len(list(set([v for section in self.vertices for v in section])))
     #sum([s.nbr_vertices() for s in self.sections])
+    def get_vertices(self):
+        return list(set([v for sublist in self.vertices for v in sublist]))
     
     
     def __repr__(self):
@@ -90,7 +101,8 @@ class State:
         self.M[node.index][r] = value
 
     def accessM(self, node, r):
-        return self.M[node.index][r]
+        print(f"node{node} r{r}")
+        return self.M[node.index][int(r)]
     
     def accessW(self, node, r):
         return self.W[node.index][r]
@@ -102,6 +114,32 @@ class State:
     def accessU(self, node, r):
         return self.U[node.index][r]
 
+
+class StateQ:
+    def __init__(self,  qnode):
+        #n is the nbr
+        self.r = qnode.nbr_vertices_subtree() +1
+        self.vertices = qnode.get_vertices() + qnode.children #qnode.get_vertices_subtree()
+        self.C = {x: np.zeros(self.r) for x in qnode.get_vertices() + qnode.children }
+        self.W = np.zeros(self.r)
+        self.U = {x: np.zeros(self.r) for x in qnode.get_vertices() + qnode.children }
+
+    def accessC(self, vertex, r):
+        return self.C[vertex][r]
+    
+    def accessU(self, vertex, r):
+        return self.U[vertex][r]
+    
+    def accessW(self, r):
+        return self.W[r]
+    
+    def updateC(self, vertex, r, value):
+        self.C[vertex][r] = value 
+
+    def updateU(self, vertex, r, value ):
+        self.U[vertex][r] = value 
+    def updateW(self, r, value):
+        self.W[r] = value
 
     
 l = Leaf([1,2])
@@ -121,7 +159,7 @@ class Section:
     def __repr__(self):
         return f"Section(vertices={self.vertices}, child={repr(self.child)})"
 
-s = Section( [1,2,3], p) 
+#s = Section( [1,2,3], p) 
 
 l1 = Leaf([4,7])
 l2 = Leaf([])
