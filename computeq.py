@@ -1,4 +1,4 @@
-from classes import Node, StateQ
+from classes import Node, StateQ, Leaf
 #create state of qnode with cr,x u0x and wr -> tgen update M
 import math 
 import numpy as np 
@@ -6,15 +6,18 @@ import numpy as np
 def updateQnode(qnode, state):
     s = initialize(qnode, state)
     n = qnode.nbr_vertices_subtree()
-    print(s.W)
      
     for r in range(1,n+1):
         stepR(qnode, state, s, r )
-        
+    
+    print(f"W{s.W}")
+ 
     for r in range(math.floor(qnode.nbr_vertices_subtree()/2) +1):
         print(r)
         print(s.accessW(r))
         state.updateM(qnode,r, min(s.accessW(r), s.accessW(n-r)))
+    return(s)
+    
     
     
 
@@ -46,12 +49,23 @@ def stepR(qnode, state, stateq,r):
             stateq.updateU(y, r, stateq.accessU(y,r-1))
             stateq.updateC(y, r, stateq.accessC(y, r-1))
 
-
+#this is the function thati s wrong
 def update(qnode, state, subtree, k):
     value = 0
-    if isinstance(subtree, Node):
-        if 0<= k and k <= subtree.nbr_vertices_subtree() -1:
-            value = state.accessM(subtree, k+1) - state.accessM(subtree, int(k)) + leftCost(qnode, subtree) - rightCost(qnode, subtree)
+    if isinstance(subtree, Leaf) and k == 0:
+        value = leftCost(qnode, subtree) - rightCost(qnode, subtree)
+    elif isinstance(subtree, Node):
+        n = subtree.nbr_vertices_subtree() #-1
+        if 0<= k and k < n:
+            next = k+1 
+            if k > n //2:
+                k = n-k
+            if next > n// 2:
+                next = n - next
+            print(k)
+            value = state.accessM(subtree, next) - state.accessM(subtree, int(k)) + leftCost(qnode, subtree) - rightCost(qnode, subtree)
+           
+
         else :
             value = math.inf
     elif k == 0:

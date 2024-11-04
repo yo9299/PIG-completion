@@ -23,7 +23,7 @@ def main(tree):
             print(state.U)
             print(state.M)
         elif isinstance(node, Qnode):
-            
+            #break
             qutils.updateQnode(node, state)
             
             print(state.M)
@@ -52,7 +52,7 @@ l9 = Leaf([9])
 l10 = Leaf([10])
 pe = Pnode([13], [l9,l10])
 pe2=Pnode([6,7], [l5,l11, l12])
-
+#pe = Qnode([[13, 9], [13,10]], [Leaf([]), Leaf([])])
 
 q1 = Qnode([[1],[1,3],[3]], [pe, l2, pe2])
 r = Pnode( [8], [l4, q1])
