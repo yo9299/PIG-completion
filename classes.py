@@ -141,28 +141,3 @@ class StateQ:
     def updateW(self, r, value):
         self.W[r] = value
 
-    
-l = Leaf([1,2])
-
-p = Pnode([3,4], [l])
-
-
-class Section:
-    def __init__(self, vertices, child):
-        self.vertices = vertices 
-        self.child = child 
-    
-    def nbr_vertices(self):
-        return len(self.vertices)
-    
-
-    def __repr__(self):
-        return f"Section(vertices={self.vertices}, child={repr(self.child)})"
-
-#s = Section( [1,2,3], p) 
-
-l1 = Leaf([4,7])
-l2 = Leaf([])
-l3 = Leaf([5])
-l4 = Leaf([6])
-q = Qnode([[1],[1,2], [2,3], [3]], [l1, l2,l3,l4])

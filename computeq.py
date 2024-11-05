@@ -19,12 +19,8 @@ def updateQnode(qnode, state):
     return(s)
     
     
-    
-
-        
-def initialize(qnode, state):
+def computeW0(qnode, state):    
     w = 0 
-    stateq = StateQ(qnode)
     for i in qnode.children:
         w += state.accessM(i,0) +rightCost(qnode, i)*i.nbr_vertices_subtree() 
     sections = set()
@@ -33,8 +29,12 @@ def initialize(qnode, state):
             if el not in sections:
                 sections.add(el)
     w += sum(rightCost(qnode, e) for e in sections)
+    return w
+        
+def initialize(qnode, state):
+    w = computeW0(qnode, state) 
+    stateq = StateQ(qnode)
     stateq.updateW(0, w)
-
     for v in stateq.C.keys(): #qnode.get_vertices_subtree():
         stateq.updateC(v, 0, update(qnode, state, v, 0))
     return stateq
@@ -74,20 +74,22 @@ def update(qnode, state, subtree, k):
         value = math.inf 
     return value 
 
-
+def getFirstSection(qnode, vertex):
+    i = 0 
+    found = False 
+    while i< len(qnode.vertices) and not found:
+            if vertex in qnode.vertices[i]:
+                found = True 
+            else: 
+                i += 1 
+    return i 
+                
 def leftCost(qnode, subtree):
     #subtree can be a subtree or a vertex in a section
     if isinstance(subtree, Node):
         i = qnode.children.index(subtree)
     else: 
-        i = 0 
-        found = False 
-        while i< len(qnode.vertices) and not found:
-            if subtree in qnode.vertices[i]:
-                found = True 
-            else: 
-                i += 1 
-                print(subtree)
+        i = getFirstSection(qnode, subtree)   
     j= 0
     cost = 0
     added = set(qnode.vertices[i])
@@ -101,19 +103,22 @@ def leftCost(qnode, subtree):
         j+=1
     return cost
 
+def getLastSection(qnode, vertex):
+    i = len(qnode.vertices)-1 
+    found = False 
+    while not found:
+        if vertex in qnode.vertices[i]:
+            found = True 
+        else: 
+            i -= 1 
+    return i 
 
 def rightCost(qnode, subtree):
     #subtree can be a subtree or a vertex in a section
     if isinstance(subtree, Node):
         i = qnode.children.index(subtree)
     else: 
-        i = len(qnode.vertices)-1 
-        found = False 
-        while not found:
-            if subtree in qnode.vertices[i]:
-                found = True 
-            else: 
-                i -= 1 
+        i = getLastSection(qnode, subtree)
     j= len(qnode.vertices)-1
     cost = 0
     added = set(qnode.vertices[i])
