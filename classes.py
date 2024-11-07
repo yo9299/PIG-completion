@@ -38,6 +38,18 @@ class Node:
         return (f"Pnode(vertices={self.vertices}, children=["
                 + ", ".join(repr(child) for child in self.children) + "])")
     
+    
+    def __eq__(self, other):
+        # Check equality based on attributes that uniquely identify the object
+        return isinstance(other, Node) and self.vertices == other.vertices and self.children == other.children
+    
+    
+    def __hash__(self):
+        # Hash based on a tuple of attributes
+        pass
+        #return hash((tuple(self.vertices), tuple(self.children)))
+    
+    
 
 
 class Pnode(Node):
@@ -53,6 +65,9 @@ class Pnode(Node):
     def __repr__(self):
         return (f"Pnode(vertices={self.vertices}, children=["
                 + ", ".join(repr(child) for child in self.children) + "])")
+    def __hash__(self):
+        # Hash based on a tuple of attributes
+        return hash((tuple(self.vertices), tuple(self.children)))
     
     
 class Leaf(Pnode):
@@ -81,6 +96,10 @@ class Qnode(Node):
     def __repr__(self):
         return (f"Qnode(vertices={self.vertices}, children=["
                 + ", ".join(repr(child) for child in self.children) + "])")
+    
+    def __hash__(self):
+        # Hash based on a tuple of attributes
+        return hash((tuple(self.get_vertices()), tuple(self.children)))
   
 class State:
 #n = tree.size 

@@ -16,7 +16,7 @@ class StateQsplit:
         self.C = {x: np.zeros(self.r +1) for x in qnode.get_vertices() + qnode.children }
         self.C2 = { x: np.zeros((self.r+1, self.r+1)) for x in qnode.get_vertices() + qnode.children }
         #initialize with infinity
-        self.W = np.zeros((self.r +1, self.r +1))
+        self.W = np.ones((self.r +1, self.r +1))*math.inf
         self.U = {x: np.zeros((self.r+1, self.r+1)) for x in qnode.get_vertices() + qnode.children }
         #create lrx and modify update so that it calls a dictionay instead of function
         self.L = {x: np.zeros(self.r+1) for x in qnode.get_vertices() + qnode.children }
@@ -61,6 +61,7 @@ def main(tree):
     while queue: 
         node = queue.pop()
         if not queue:
+            break
             W = finalS(node, state)
         elif isinstance(node, Leaf):
             putils.updateLeaf(node, state)
@@ -74,13 +75,13 @@ def main(tree):
     for x in range(r):
         sol = min(sol,state.accessM(tree, x))
     """
-    return W #sol
+    return state #W #sol
 
 def finalS(qnode, state):
     #perfect the bounds, otherwise we will reach errors
     stateq = finalR(qnode, state)
-    for r in range(qnode.nbr_vertices_subtree()):
-        for s in range(qnode.nbr_vertices_subtree()):
+    for r in range( qnode.nbr_vertices_subtree()+1):
+        for s in range(1, qnode.nbr_vertices_subtree()+1):
             if isFeasible(qnode,r,s):
                 stepS(qnode, state, stateq, r, s)
     return stateq.W  
@@ -95,7 +96,7 @@ def initialize(qnode, state):
     return stateq
 
 def stepR(qnode, state, stateq, r):
-    #tateq = initialize(qnode, state)
+    #stateq = initialize(qnode, state)
     vertex = min(stateq.C, key= lambda x: stateq.accessC(x,r-1))
     stateq.updateW(r, 0,stateq.accessW( r-1, 0)+ stateq.accessC(vertex, r-1) )
     stateq.updateU(vertex, r,0, stateq.accessU(vertex,r-1, 0)+1)
@@ -108,30 +109,60 @@ def stepR(qnode, state, stateq, r):
             #is this correct?
             stateq.updateC2(y, r,0, stateq.accessC2(y, r-1,0))
 
+#this one is correct
 def finalR(qnode, state):
     stateq = initialize(qnode, state)
     for r in range(1, qnode.nbr_vertices_subtree()+1):
         stepR(qnode, state,stateq, r)
     return stateq
 
-def initialS(qnode, state, stateq, r):
+def findSplitSubtree(stateq, r):
     split = None
     for x in stateq.C.keys():
         if isinstance(x, Node) and stateq.accessC2(x,r,0) == math.inf and stateq.accessU(x,r,0)< x.nbr_vertices_subtree():
             split = x 
             break 
+    return split 
+
+#the s is wrong
+def initialSnonsplit(qnode, state, stateq, r):
+    print(stateq.C2.keys())
+    for x in stateq.C2.keys():
+        #print(f"for {x} stateq.accessC2(x,r,0)")
+        #continue
+        if stateq.accessC2(x,r,0) != math.inf:
+            stateq.updateL(x, r, leftCost(qnode, x) - verticesToLeft(qnode, x, stateq, None, r))
+            stateq.updateC2(x,r,0, updatel(qnode,state, x, 0, stateq.accessL(x,r)))
+        else: 
+            stateq.updateC2(x,r,0, updatel(qnode,state, x, 0, math.inf))
+
+def initialS(qnode, state, stateq, r):
+    #separate cases where tree is split and not.
+    split = findSplitSubtree(stateq, r)
     if split: 
-        s = split.nbr_vertices_subtree() - stateq.accessU(split,r,0)
+        s = int(split.nbr_vertices_subtree() - stateq.accessU(split,r,0))
+        print(s)
         stateq.updateW(r,s,stateq.accessW(r,0) - rightCost(qnode, split))
         stateq.updateU(split,r,s,x.nbr_vertices_subtree())
-
-    for x in stateq.C.keys():
+    else :
+        s= 0
+    for x in stateq.C2.keys():
         if x != split and stateq.accessC2(x,r,0) != math.inf:
             stateq.updateL(x, r, leftCost(qnode, x) - verticesToLeft(qnode, x, stateq, split, r))
             stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, stateq.accessL(x,r)))
         else: 
             stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, math.inf))
     
+def stepS(qnode, state, stateq, r,s):
+    vertex = min(stateq.C2, key= lambda x: stateq.accessC2(x,r, s-1))
+    print(f"the value{stateq.accessL(vertex,r)}")
+    stateq.updateW(r, s,stateq.accessW( r, s-1)+ stateq.accessC2(vertex, r, s-1) )
+    stateq.updateU(vertex, r, s,stateq.accessU(vertex,r,s-1)+1)
+    stateq.updateC2(vertex, r, s,updatel(qnode, state, vertex, stateq.accessU(vertex, r,s), stateq.accessL(vertex,r)))
+    for y in stateq.vertices:
+        if y != vertex:
+            stateq.updateU(y, r,s, stateq.accessU(y,r,s-1))
+            stateq.updateC2(y, r,s, stateq.accessC2(y, r,s-1))
 
 def updatel(qnode, state, subtree, k, left):
     value = 0
@@ -162,30 +193,24 @@ def verticesToLeft(qnode, subtree, stateq, split,r):
         i = getFirstSection(qnode, subtree)
     j = 0 
     nbr = 0
-    sections = set()
-    while j < i :
-        x = qnode.children[j]
-        if x!= split and stateq.accessC2(x,r,0) == math.inf:
-            nbr.append(x.nbr_vertices_subtree())
-        sections.add(v for v in qnode.vertices[j])
-    for v in sections: 
-        if stateq.accessC2(v,r,0) == math.inf:
-            nbr += 1 
+    sections = []
+    for x in stateq.C2.keys():
+        if stateq.accessC2(x,r,0) == math.inf:
+            if isinstance(x, Node):
+                j = qnode.children.index(x)
+                if j < i:
+                    nbr += x.nbr_vertices_subtree()
+            else: 
+                j = getLastSection(qnode, x)
+                if j < i:
+                    nbr += 1
     return nbr 
 
-def stepS(qnode, state, stateq, r,s):
-    vertex = min(stateq.C2, key= lambda x: stateq.accessC2(x,r, s-1))
-    print(f"the value{stateq.accessL(vertex,r)}")
-    stateq.updateW(r, s,stateq.accessW( r, s-1)+ stateq.accessC2(vertex, r, s-1) )
-    stateq.updateU(vertex, r, s,stateq.accessU(vertex,r,s-1)+1)
-    stateq.updateC2(vertex, r, s,updatel(qnode, state, vertex, stateq.accessU(vertex, r,s), stateq.accessL(vertex,r)))
-    for y in stateq.vertices:
-        if y != vertex:
-            stateq.updateU(y, r,s, stateq.accessU(y,r,s-1))
-            stateq.updateC2(y, r,s, stateq.accessC2(y, r,s-1))
 
 
- 
+
+
+#everything below is working
 def isFeasible(qnode, r,s):
     v1, v2 = getFirstsCenters(qnode)
     n1 = nb_vertices_induced(qnode, v1)
@@ -229,12 +254,12 @@ def nb_vertices_intersection(qnode, v1, v2):
 def nb_vertices_between(qnode, i, j):
     k = i 
     count = 0
-    sections = set()
+    sections = []
     while k <= j :
-        sections.add(v for v in qnode.vertices[k])
+        sections = sections + [v for v in qnode.vertices[k]]
         count += qnode.children[k].nbr_vertices_subtree()
-        k +=1 
-    count+= len(sections)
+        k +=1     
+    count+= len(set(sections))
     return count 
 
 #main equal but if queue only contains one element, call finalS 
