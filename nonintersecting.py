@@ -91,8 +91,8 @@ def finalS(qnode, state):
     for r in range( qnode.nbr_vertices_subtree()+1):
         for s in range( qnode.nbr_vertices_subtree()+1):
             if not isFeasible(qnode, r,s):
-                break
-                #stateq.updateW(r,s, math.inf)
+                #break
+                stateq.updateW(r,s, math.inf)
     return stateq 
 
 def initialS(qnode, state, stateq, r):
@@ -101,7 +101,7 @@ def initialS(qnode, state, stateq, r):
     if split: 
         s = int(split.nbr_vertices_subtree() - stateq.accessU(split,r,0))
         #print(s)
-        stateq.updateW(r,s,stateq.accessW(r,0) - rightCost(qnode, split))
+        stateq.updateW(r,s,stateq.accessW(r,0) - rightCost(qnode, split)*s)
         stateq.updateU(split,r,s,split.nbr_vertices_subtree())
     else :
         s= 0
@@ -109,17 +109,17 @@ def initialS(qnode, state, stateq, r):
         if x != split and stateq.accessC2(x,r,0) != math.inf:
             stateq.updateL(x, r, leftCost(qnode, x) - verticesToLeft(qnode, x, stateq, split, r))
             stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, stateq.accessL(x,r)))
-        #elif x != split : 
-        #    stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, math.inf))
+        else: 
+            stateq.updateC2(x,r,s, math.inf) #updatel(qnode,state, x, 0, math.inf))
     return s 
     
 def stepS(qnode, state, stateq, r,s):
     vertex = min(stateq.C2, key= lambda x: stateq.accessC2(x,r, s-1))
     #print(f"the value{stateq.accessL(vertex,r)}")
-    stateq.updateW(r, s,stateq.accessW( r, s-1)+ stateq.accessC2(vertex, r, s-1) )
+    stateq.updateW(r, s,stateq.accessW( r, s-1)+ stateq.accessC2(vertex, r, s-1))
     stateq.updateU(vertex, r, s,stateq.accessU(vertex,r,s-1)+1)
     stateq.updateC2(vertex, r, s,updatel(qnode, state, vertex, stateq.accessU(vertex, r,s), stateq.accessL(vertex,r)))
-    for y in stateq.vertices:
+    for y in stateq.C2.keys():
         if y != vertex:
             stateq.updateU(y, r,s, stateq.accessU(y,r,s-1))
             stateq.updateC2(y, r,s, stateq.accessC2(y, r,s-1))
@@ -217,6 +217,8 @@ def isFeasible(qnode, r,s):
     n1 = nb_vertices_induced(qnode, v1)
     n2 = nb_vertices_induced(qnode, v2)
     n12 = nb_vertices_intersection(qnode, v1, v2)
+    if r+s > qnode.nbr_vertices_subtree():
+        return False 
     if r > n1 - n12 and s != n1+n2 - n12 -r:
         return False
     if r < n1 -n12 and s < n1-r :
