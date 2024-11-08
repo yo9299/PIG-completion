@@ -80,11 +80,56 @@ def main(tree):
 def finalS(qnode, state):
     #perfect the bounds, otherwise we will reach errors
     stateq = finalR(qnode, state)
+    #r should only go until size of subtree of first center
     for r in range( qnode.nbr_vertices_subtree()+1):
-        for s in range(1, qnode.nbr_vertices_subtree()+1):
-            if isFeasible(qnode,r,s):
+        s0 = initialS(qnode, state, stateq, r)
+        print(f"for r {r} state {stateq.C2}")
+        for s in range(s0+1, qnode.nbr_vertices_subtree()+1):
+                #break
                 stepS(qnode, state, stateq, r, s)
-    return stateq.W  
+            #afterwards filter out the feasible
+    for r in range( qnode.nbr_vertices_subtree()+1):
+        for s in range( qnode.nbr_vertices_subtree()+1):
+            if not isFeasible(qnode, r,s):
+                break
+                #stateq.updateW(r,s, math.inf)
+    return stateq 
+
+def initialS(qnode, state, stateq, r):
+    #separate cases where tree is split and not.
+    split = findSplitSubtree(stateq, r)
+    if split: 
+        s = int(split.nbr_vertices_subtree() - stateq.accessU(split,r,0))
+        #print(s)
+        stateq.updateW(r,s,stateq.accessW(r,0) - rightCost(qnode, split))
+        stateq.updateU(split,r,s,split.nbr_vertices_subtree())
+    else :
+        s= 0
+    for x in stateq.C2.keys():
+        if x != split and stateq.accessC2(x,r,0) != math.inf:
+            stateq.updateL(x, r, leftCost(qnode, x) - verticesToLeft(qnode, x, stateq, split, r))
+            stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, stateq.accessL(x,r)))
+        #elif x != split : 
+        #    stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, math.inf))
+    return s 
+    
+def stepS(qnode, state, stateq, r,s):
+    vertex = min(stateq.C2, key= lambda x: stateq.accessC2(x,r, s-1))
+    #print(f"the value{stateq.accessL(vertex,r)}")
+    stateq.updateW(r, s,stateq.accessW( r, s-1)+ stateq.accessC2(vertex, r, s-1) )
+    stateq.updateU(vertex, r, s,stateq.accessU(vertex,r,s-1)+1)
+    stateq.updateC2(vertex, r, s,updatel(qnode, state, vertex, stateq.accessU(vertex, r,s), stateq.accessL(vertex,r)))
+    for y in stateq.vertices:
+        if y != vertex:
+            stateq.updateU(y, r,s, stateq.accessU(y,r,s-1))
+            stateq.updateC2(y, r,s, stateq.accessC2(y, r,s-1))
+
+#this one is correct
+def finalR(qnode, state):
+    stateq = initialize(qnode, state)
+    for r in range(1, qnode.nbr_vertices_subtree()+1):
+        stepR(qnode, state,stateq, r)
+    return stateq
 
 def initialize(qnode, state):
     w = computeW0(qnode, state)
@@ -109,12 +154,7 @@ def stepR(qnode, state, stateq, r):
             #is this correct?
             stateq.updateC2(y, r,0, stateq.accessC2(y, r-1,0))
 
-#this one is correct
-def finalR(qnode, state):
-    stateq = initialize(qnode, state)
-    for r in range(1, qnode.nbr_vertices_subtree()+1):
-        stepR(qnode, state,stateq, r)
-    return stateq
+
 
 def findSplitSubtree(stateq, r):
     split = None
@@ -123,46 +163,6 @@ def findSplitSubtree(stateq, r):
             split = x 
             break 
     return split 
-
-#the s is wrong
-def initialSnonsplit(qnode, state, stateq, r):
-    print(stateq.C2.keys())
-    for x in stateq.C2.keys():
-        #print(f"for {x} stateq.accessC2(x,r,0)")
-        #continue
-        if stateq.accessC2(x,r,0) != math.inf:
-            stateq.updateL(x, r, leftCost(qnode, x) - verticesToLeft(qnode, x, stateq, None, r))
-            stateq.updateC2(x,r,0, updatel(qnode,state, x, 0, stateq.accessL(x,r)))
-        else: 
-            stateq.updateC2(x,r,0, updatel(qnode,state, x, 0, math.inf))
-
-def initialS(qnode, state, stateq, r):
-    #separate cases where tree is split and not.
-    split = findSplitSubtree(stateq, r)
-    if split: 
-        s = int(split.nbr_vertices_subtree() - stateq.accessU(split,r,0))
-        print(s)
-        stateq.updateW(r,s,stateq.accessW(r,0) - rightCost(qnode, split))
-        stateq.updateU(split,r,s,x.nbr_vertices_subtree())
-    else :
-        s= 0
-    for x in stateq.C2.keys():
-        if x != split and stateq.accessC2(x,r,0) != math.inf:
-            stateq.updateL(x, r, leftCost(qnode, x) - verticesToLeft(qnode, x, stateq, split, r))
-            stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, stateq.accessL(x,r)))
-        else: 
-            stateq.updateC2(x,r,s, updatel(qnode,state, x, 0, math.inf))
-    
-def stepS(qnode, state, stateq, r,s):
-    vertex = min(stateq.C2, key= lambda x: stateq.accessC2(x,r, s-1))
-    print(f"the value{stateq.accessL(vertex,r)}")
-    stateq.updateW(r, s,stateq.accessW( r, s-1)+ stateq.accessC2(vertex, r, s-1) )
-    stateq.updateU(vertex, r, s,stateq.accessU(vertex,r,s-1)+1)
-    stateq.updateC2(vertex, r, s,updatel(qnode, state, vertex, stateq.accessU(vertex, r,s), stateq.accessL(vertex,r)))
-    for y in stateq.vertices:
-        if y != vertex:
-            stateq.updateU(y, r,s, stateq.accessU(y,r,s-1))
-            stateq.updateC2(y, r,s, stateq.accessC2(y, r,s-1))
 
 def updatel(qnode, state, subtree, k, left):
     value = 0
@@ -176,7 +176,6 @@ def updatel(qnode, state, subtree, k, left):
                 k = n-k
             if next > n// 2:
                 next = n - next
-            print(k)
             value = state.accessM(subtree, next) - state.accessM(subtree, int(k)) + left - rightCost(qnode, subtree)
         else :
             value = math.inf
@@ -186,6 +185,7 @@ def updatel(qnode, state, subtree, k, left):
         value = math.inf 
     return value 
 
+#is this failing
 def verticesToLeft(qnode, subtree, stateq, split,r):
     if isinstance(subtree, Node):
         i = qnode.children.index(subtree)
@@ -196,10 +196,11 @@ def verticesToLeft(qnode, subtree, stateq, split,r):
     sections = []
     for x in stateq.C2.keys():
         if stateq.accessC2(x,r,0) == math.inf:
+            #print(x)
             if isinstance(x, Node):
                 j = qnode.children.index(x)
                 if j < i:
-                    nbr += x.nbr_vertices_subtree()
+                    nbr += stateq.accessU(x,r,0)#x.nbr_vertices_subtree()
             else: 
                 j = getLastSection(qnode, x)
                 if j < i:
